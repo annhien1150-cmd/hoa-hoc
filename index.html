@@ -3,487 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Game Phòng Thí Nghiệm Hạt Nhân</title>
+    <title>Nuclear Core - Lò Phản Ứng Tương Lai</title>
     <style>
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f172a;
-            color: #f8fafc;
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --accent: #ff0844;
+            --bg-dark: #0a0e17;
+            --card-bg: rgba(16, 24, 40, 0.85);
+            --text-light: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        header {
+            width: 100%;
+            padding: 15px 30px;
+            background: rgba(10, 14, 23, 0.9);
+            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+        }
+
+        .score-board {
+            font-size: 1.1rem;
+            background: rgba(0, 242, 254, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
         }
 
         .container {
-            width: 100%;
-            max-width: 900px;
-            background: #1e293b;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            border: 2px solid #0ea5e9;
-        }
-
-        h1 {
-            text-align: center;
-            color: #38bdf8;
-            margin-bottom: 8px;
-            font-size: 26px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 25px;
-            font-size: 14px;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            background: #0f172a;
-            border: 1px solid #334155;
-            color: #64748b;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .tab-btn.active {
-            background: #0284c7;
-            color: white;
-            border-color: #38bdf8;
-        }
-
-        .tab-btn.completed {
-            border-color: #10b981;
-            color: #34d399;
-        }
-
-        .tab-btn.locked {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .section-content { display: none; }
-        .section-content.active { display: block; }
-
-        .question-card {
-            background: #0f172a;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 15px;
-            border-left: 4px solid #0ea5e9;
-        }
-
-        .question-card p {
-            margin-top: 0;
-            font-weight: 600;
-            color: #e2e8f0;
-        }
-
-        .options {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 20px;
         }
 
-        .option-label {
+        /* Canvas mô phỏng Hạt nhân */
+        .simulation-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            text-align: center;
+        }
+
+        #canvas3d {
+            width: 100%;
+            height: 250px;
+            background: #000;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
+        /* Khung trợ lý AI */
+        .ai-assistant {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.05));
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-style: italic;
             display: flex;
             align-items: center;
-            background: #1e293b;
-            padding: 10px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border: 1px solid #334155;
+            gap: 15px;
         }
 
-        .option-label:hover { background: #334155; }
-        .option-label input { margin-right: 12px; accent-color: #0ea5e9; }
+        .ai-avatar {
+            width: 45px;
+            height: 45px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 15px var(--primary);
+        }
 
-        .action-btn {
-            width: 100%;
-            padding: 14px;
-            background: #0ea5e9;
-            color: white;
+        /* Card câu hỏi Quiz */
+        .quiz-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 5px 12px;
+            background: rgba(0, 242, 254, 0.2);
+            color: var(--primary);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media(min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-light);
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            background: rgba(0, 242, 254, 0.15);
+            border-color: var(--primary);
+        }
+
+        .option-btn.correct {
+            background: rgba(0, 230, 118, 0.25) !important;
+            border-color: #00e676 !important;
+            color: #00e676;
+        }
+
+        .option-btn.wrong {
+            background: rgba(255, 82, 82, 0.25) !important;
+            border-color: #ff5252 !important;
+            color: #ff5252;
+        }
+
+        /* Khung giải thích */
+        .explanation-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            display: none;
+            border-left: 3px solid #ffb300;
+        }
+
+        /* Nút chuyển câu */
+        .next-btn {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            color: #000;
             font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
-            margin-top: 15px;
-            transition: background 0.2s;
-        }
-
-        .action-btn:hover { background: #0284c7; }
-
-        .status-msg {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            text-align: center;
+            float: right;
             display: none;
         }
 
-        .status-msg.error { background: #7f1d1d; color: #fca5a5; display: block; }
-        .status-msg.success { background: #065f46; color: #6ee7b7; display: block; }
-
-        /* KHU VỰC MÔ HÌNH THỰC HÀNH */
-        .model-box {
-            margin-top: 25px;
-            background: #0f172a;
-            border: 2px dashed #10b981;
-            border-radius: 12px;
-            padding: 20px;
+        /* Màn hình kết thúc */
+        .result-screen {
+            display: none;
             text-align: center;
+            padding: 40px 20px;
         }
 
-        .lab-badge {
-            display: inline-block;
-            background: #065f46;
-            color: #34d399;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-bottom: 10px;
-            font-weight: bold;
+        .result-title {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
         }
-
-        .lab-btn {
-            display: inline-block;
-            padding: 14px 28px;
-            background: #10b981;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 8px;
-            margin-top: 15px;
-            transition: background 0.2s;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .lab-btn:hover { background: #059669; }
-
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🧪 Mini Game: Phóng Xạ & Phản Ứng Hạt Nhân</h1>
-    <div class="subtitle">Hệ thống mô phỏng và kiểm tra kiến thức chuyên ngành hóa - lý</div>
+    <header>
+        <div class="logo-title">⚛️ NUCLEAR CORE - GAME QUIZ AI</div>
+        <div class="score-board">Điểm: <span id="score">0</span> / 150</div>
+    </header>
 
-    <!-- TABS CHỌN PHẦN -->
-    <div class="nav-tabs">
-        <button id="tab-1" class="tab-btn active" onclick="switchTab(1)">1. Phóng xạ nhân tạo</button>
-        <button id="tab-2" class="tab-btn locked" onclick="switchTab(2)">2. Phản ứng phân hạch</button>
-        <button id="tab-3" class="tab-btn locked" onclick="switchTab(3)">3. Phản ứng nhiệt hạch</button>
-    </div>
-
-    <!-- ==================== PHẦN 1: PHÓNG XẠ NHÂN TẠO ==================== -->
-    <div id="section-1" class="section-content active">
-        <div id="quiz-1">
-            <h3>Thử thách 1: Trả lời đúng 5 câu hỏi để mở khóa phòng thí nghiệm</h3>
-            
-            <div class="question-card">
-                <p>1. Phóng xạ nhân tạo là hiện tượng do nguyên nhân nào gây ra?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p1_q1" value="A"> A. Tự phát biến đổi hạt nhân</label>
-                    <label class="option-label"><input type="radio" name="p1_q1" value="B"> B. Con người dùng tác nhân bên ngoài kích thích</label>
-                    <label class="option-label"><input type="radio" name="p1_q1" value="C"> C. Sự phân rã nhiệt độ cao</label>
-                    <label class="option-label"><input type="radio" name="p1_q1" value="D"> D. Tác động của từ trường Trái Đất</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>2. Dụng cụ nào thường được dùng để bắn phá hạt nhân trong phóng xạ nhân tạo?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p1_q2" value="A"> A. Kính hiển vi điện tử</label>
-                    <label class="option-label"><input type="radio" name="p1_q2" value="B"> B. Máy gia tốc hạt</label>
-                    <label class="option-label"><input type="radio" name="p1_q2" value="C"> C. Lò vi sóng công nghiệp</label>
-                    <label class="option-label"><input type="radio" name="p1_q2" value="D"> D. Máy quang phổ</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>3. Tia phóng xạ nào có thể phát ra từ phóng xạ nhân tạo?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p1_q3" value="A"> A. Tia hồng ngoại</label>
-                    <label class="option-label"><input type="radio" name="p1_q3" value="B"> B. Tia tử ngoại</label>
-                    <label class="option-label"><input type="radio" name="p1_q3" value="C"> C. Các tia &alpha;, &beta;, &gamma;</label>
-                    <label class="option-label"><input type="radio" name="p1_q3" value="D"> D. Sóng radio</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>4. Ứng dụng quan trọng nhất của phóng xạ nhân tạo trong y học là gì?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p1_q4" value="A"> A. Chẩn đoán và điều trị ung thư</label>
-                    <label class="option-label"><input type="radio" name="p1_q4" value="B"> B. Sát trùng dụng cụ phẫu thuật</label>
-                    <label class="option-label"><input type="radio" name="p1_q4" value="C"> C. Đo huyết áp tự động</label>
-                    <label class="option-label"><input type="radio" name="p1_q4" value="D"> D. Tổng hợp Vitamin D</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>5. Khác biệt chính giữa phóng xạ nhân tạo và phóng xạ tự nhiên là gì?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p1_q5" value="A"> A. Tia phát ra có tính chất khác nhau hoàn toàn</label>
-                    <label class="option-label"><input type="radio" name="p1_q5" value="B"> B. Phóng xạ nhân tạo do con người chủ động kích thích</label>
-                    <label class="option-label"><input type="radio" name="p1_q5" value="C"> C. Phóng xạ tự nhiên không phát ra năng lượng</label>
-                    <label class="option-label"><input type="radio" name="p1_q5" value="D"> D. Phóng xạ nhân tạo chỉ xảy ra trong nước</label>
-                </div>
-            </div>
-
-            <button class="action-btn" onclick="checkPart(1)">Nộp bài & Mở khóa Phần 2</button>
-            <div id="msg-1" class="status-msg"></div>
+    <div class="container">
+        <!-- AI Host Message -->
+        <div class="ai-assistant">
+            <div class="ai-avatar">AI</div>
+            <div class="ai-text" id="ai-msg">Xin chào các kỹ sư hạt nhân! Hãy trả lời chính xác các câu hỏi để tích lũy năng lượng cho lò phản ứng.</div>
         </div>
 
-        <!-- MÔ HÌNH PHẦN 1 -->
-        <div id="model-1" class="model-box hidden">
-            <span class="lab-badge">PHÒNG THÍ NGHIỆM ẢO #1</span>
-            <h2 style="color: #34d399; margin-top: 5px;">Mô Hình Thực Hành Phóng Xạ</h2>
-            <p>Quan sát quá trình phân rã chu kỳ bán rã và tương tác trực quan với các đồng vị phóng xạ.</p>
-            <a href="https://phet.colorado.edu/sims/html/radioactive-dating-game/latest/radioactive-dating-game_vi.html" target="_blank" class="lab-btn">🔬 Mở Thí Nghiệm Phóng Xạ</a>
+        <!-- Mô phỏng 3D Canvas -->
+        <div class="simulation-card">
+            <h3 id="sim-title">Mô phỏng: Phóng xạ nhân tạo</h3>
+            <canvas id="canvas3d"></canvas>
+        </div>
+
+        <!-- Khung Quiz Game -->
+        <div class="quiz-card" id="quiz-box">
+            <div class="category-tag" id="category">Phần 1: Phóng xạ nhân tạo</div>
+            <div class="question-text" id="question">Đang tải câu hỏi...</div>
+            <div class="options-grid" id="options"></div>
+            <div class="explanation-box" id="explanation"></div>
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()">Câu tiếp theo ➔</button>
+        </div>
+
+        <!-- Màn hình Tổng kết -->
+        <div class="quiz-card result-screen" id="result-box">
+            <h2 class="result-title">🎉 HOÀN THÀNH THỬ THÁCH!</h2>
+            <p style="font-size: 1.2rem; margin-bottom: 20px;" id="final-score"></p>
+            <p id="final-eval" style="color: #aaa; margin-bottom: 25px;"></p>
+            <button class="next-btn" style="display:inline-block; float:none;" onclick="location.reload()">Chơi lại từ đầu 🔄</button>
         </div>
     </div>
 
-    <!-- ==================== PHẦN 2: PHẢN ỨNG PHÂN HẠCH ==================== -->
-    <div id="section-2" class="section-content">
-        <div id="quiz-2">
-            <h3>Thử thách 2: Trả lời đúng 5 câu hỏi để mở khóa phần tiếp theo</h3>
-
-            <div class="question-card">
-                <p>1. Phản ứng phân hạch là quá trình một hạt nhân nặng hấp thụ hạt nào?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p2_q1" value="A"> A. Proton nhanh</label>
-                    <label class="option-label"><input type="radio" name="p2_q1" value="B"> B. Electron</label>
-                    <label class="option-label"><input type="radio" name="p2_q1" value="C"> C. Neutron chậm</label>
-                    <label class="option-label"><input type="radio" name="p2_q1" value="D"> D. Hạt Positron</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>2. Nhiên liệu phổ biến dùng trong phản ứng phân hạch là gì?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p2_q2" value="A"> A. Hydro và Cáctông</label>
-                    <label class="option-label"><input type="radio" name="p2_q2" value="B"> B. U-235 hoặc Pu-239</label>
-                    <label class="option-label"><input type="radio" name="p2_q2" value="C"> C. Heli-4</label>
-                    <label class="option-label"><input type="radio" name="p2_q2" value="D"> D. Carbon-12</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>3. Mỗi phân hạch hạt nhân U-235 tỏa ra năng lượng khoảng bao nhiêu?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p2_q3" value="A"> A. 200 MeV</label>
-                    <label class="option-label"><input type="radio" name="p2_q3" value="B"> B. 17.6 MeV</label>
-                    <label class="option-label"><input type="radio" name="p2_q3" value="C"> C. 200 eV</label>
-                    <label class="option-label"><input type="radio" name="p2_q3" value="D"> D. 1000 MeV</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>4. Yếu tố nào giúp duy trì "phản ứng dây chuyền" trong lò phản ứng?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p2_q4" value="A"> A. Các bức xạ gamma</label>
-                    <label class="option-label"><input type="radio" name="p2_q4" value="B"> B. 2 - 3 neutron mới sinh ra sau mỗi phân hạch</label>
-                    <label class="option-label"><input type="radio" name="p2_q4" value="C"> C. Nhiệt độ môi trường cực cao</label>
-                    <label class="option-label"><input type="radio" name="p2_q4" value="D"> D. Áp suất khí quyển</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>5. Nhược điểm lớn nhất của năng lượng phân hạch hiện nay là gì?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p2_q5" value="A"> A. Không tạo ra điện năng</label>
-                    <label class="option-label"><input type="radio" name="p2_q5" value="B"> B. Tốn quá nhiều nước biển</label>
-                    <label class="option-label"><input type="radio" name="p2_q5" value="C"> C. Rác thải phóng xạ tồn tại rất lâu và nguy cơ sự cố</label>
-                    <label class="option-label"><input type="radio" name="p2_q5" value="D"> D. Dễ dàng chế tạo tại nhà</label>
-                </div>
-            </div>
-
-            <button class="action-btn" onclick="checkPart(2)">Nộp bài & Mở khóa Phần 3</button>
-            <div id="msg-2" class="status-msg"></div>
-        </div>
-
-        <!-- MÔ HÌNH PHẦN 2 -->
-        <div id="model-2" class="model-box hidden">
-            <span class="lab-badge">PHÒNG THÍ NGHIỆM ẢO #2</span>
-            <h2 style="color: #34d399; margin-top: 5px;">Mô Hình Phản Ứng Dây Chuyền (Phân Hạch)</h2>
-            <p>Bắn hạt neutron vào hạt nhân U-235 để mô phỏng sự vỡ hạt và kiểm soát phản ứng dây chuyền.</p>
-            <a href="https://phet.colorado.edu/sims/html/nuclear-fission/latest/nuclear-fission_vi.html" target="_blank" class="lab-btn">🔬 Mở Thí Nghiệm Phân Hạch</a>
-        </div>
-    </div>
-
-    <!-- ==================== PHẦN 3: PHẢN ỨNG NHIỆT HẠCH ==================== -->
-    <div id="section-3" class="section-content">
-        <div id="quiz-3">
-            <h3>Thử thách 3: Trả lời đúng 5 câu hỏi để hoàn thành Mini Game</h3>
-
-            <div class="question-card">
-                <p>1. Phản ứng nhiệt hạch là gì?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p3_q1" value="A"> A. Bắn vỡ hạt nhân nặng thành hạt nhẹ</label>
-                    <label class="option-label"><input type="radio" name="p3_q1" value="B"> B. Kết hợp hai hay nhiều hạt nhân nhẹ thành hạt nhân nặng hơn</label>
-                    <label class="option-label"><input type="radio" name="p3_q1" value="C"> C. Sự phân rã tự nhiên của Uranium</label>
-                    <label class="option-label"><input type="radio" name="p3_q1" value="D"> D. Đốt cháy khí Hidro trong oxy</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>2. Điều kiện bắt buộc để xảy ra phản ứng nhiệt hạch là gì?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p3_q2" value="A"> A. Nhiệt độ hàng chục đến hàng trăm triệu độ C</label>
-                    <label class="option-label"><input type="radio" name="p3_q2" value="B"> B. Làm lạnh xuống gần 0 Kelvin</label>
-                    <label class="option-label"><input type="radio" name="p3_q2" value="C"> C. Đặt trong môi trường chân không tuyệt đối</label>
-                    <label class="option-label"><input type="radio" name="p3_q2" value="D"> D. Không cần điều kiện gì đặc biệt</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>3. Nhiên liệu chủ yếu cho phản ứng nhiệt hạch (như Deuterium) có thể khai thác từ đâu?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p3_q3" value="A"> A. Khai thác mỏ quặng sâu trong lòng đất</label>
-                    <label class="option-label"><input type="radio" name="p3_q3" value="B"> B. Dồi dào trong nước biển</label>
-                    <label class="option-label"><input type="radio" name="p3_q3" value="C"> C. Tổng hợp từ chất thải nhựa</label>
-                    <label class="option-label"><input type="radio" name="p3_q3" value="D"> D. Nhập khẩu từ các hành tinh khác</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>4. Ưu điểm lớn nhất của nhiệt hạch so với phân hạch là gì?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p3_q4" value="A"> A. Dễ chế tạo hơn rất nhiều</label>
-                    <label class="option-label"><input type="radio" name="p3_q4" value="B"> B. Ít hoặc không tạo ra rác thải phóng xạ độc hại lâu năm</label>
-                    <label class="option-label"><input type="radio" name="p3_q4" value="C"> C. Không tỏa ra nhiệt năng</label>
-                    <label class="option-label"><input type="radio" name="p3_q4" value="D"> D. Chi phí vận hành cực kỳ rẻ hiện nay</label>
-                </div>
-            </div>
-
-            <div class="question-card">
-                <p>5. Phản ứng tổng hợp Deuterium (D) và Tritium (T) tạo thành hạt nhân Heli và hạt nào?</p>
-                <div class="options">
-                    <label class="option-label"><input type="radio" name="p3_q5" value="A"> A. Electron</label>
-                    <label class="option-label"><input type="radio" name="p3_q5" value="B"> B. Proton</label>
-                    <label class="option-label"><input type="radio" name="p3_q5" value="C"> C. Neutron (n) kèm năng lượng 17.6 MeV</label>
-                    <label class="option-label"><input type="radio" name="p3_q5" value="D"> D. Positron</label>
-                </div>
-            </div>
-
-            <button class="action-btn" onclick="checkPart(3)">Nộp bài hoàn thành Mini Game</button>
-            <div id="msg-3" class="status-msg"></div>
-        </div>
-
-        <!-- MÔ HÌNH PHẦN 3 -->
-        <div id="model-3" class="model-box hidden">
-            <span class="lab-badge">PHÒNG THÍ NGHIỆM ẢO #3</span>
-            <h2 style="color: #34d399; margin-top: 5px;">Mô Hình Tổng Hợp Hạt Nhân (Nhiệt Hạch)</h2>
-            <p>Khám phá năng lượng vô tận và điều kiện tổng hợp các đồng vịHydro ở nhiệt độ cao.</p>
-            <a href="https://phet.colorado.edu/sims/html/nuclear-fission/latest/nuclear-fission_vi.html" target="_blank" class="lab-btn">🔬 Mở Thí Nghiệm Nhiệt Hạch</a>
-        </div>
-    </div>
-</div>
-
-<script>
-    // ĐÁP ÁN ĐÚNG CHO TỪNG PHẦN
-    const answers = {
-        1: { p1_q1: "B", p1_q2: "B", p1_q3: "C", p1_q4: "A", p1_q5: "B" },
-        2: { p2_q1: "C", p2_q2: "B", p2_q3: "A", p2_q4: "B", p2_q5: "C" },
-        3: { p3_q1: "B", p3_q2: "A", p3_q3: "B", p3_q4: "B", p3_q5: "C" }
-    };
-
-    // Theo dõi phần nào đã được mở khóa (phần 1 mặc định mở)
-    const unlockedParts = { 1: true, 2: false, 3: false };
-
-    // Chuyển Tab có kiểm soát điều kiện khóa/mở
-    function switchTab(partNum) {
-        // Kiểm tra xem phần này đã được mở khóa chưa
-        if (!unlockedParts[partNum]) {
-            alert("🔒 Bạn cần hoàn thành phần trước đó và mở khóa để truy cập phần này!");
-            return;
-        }
-
-        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-            btn.classList.toggle('active', idx === partNum - 1);
-        });
-        document.querySelectorAll('.section-content').forEach((sec, idx) => {
-            sec.classList.toggle('active', idx === partNum - 1);
-        });
-    }
-
-    // Kiểm tra đáp án từng phần
-    function checkPart(partNum) {
-        const correctAnswers = answers[partNum];
-        let allCorrect = true;
-        let unanswered = false;
-
-        for (let q in correctAnswers) {
-            const selected = document.querySelector(`input[name="${q}"]:checked`);
-            if (!selected) {
-                unanswered = true;
-                break;
-            }
-            if (selected.value !== correctAnswers[q]) {
-                allCorrect = false;
-            }
-        }
-
-        const msgDiv = document.getElementById(`msg-${partNum}`);
-
-        if (unanswered) {
-            msgDiv.className = "status-msg error";
-            msgDiv.textContent = "⚠️ Vui lòng trả lời đủ tất cả 5 câu hỏi!";
-            return;
-        }
-
-        if (allCorrect) {
-            msgDiv.className = "status-msg success";
-            msgDiv.textContent = "🎉 Chính xác! Đã mở khóa thành công phòng thí nghiệm ảo.";
-            
-            // Đánh dấu tab hiện tại đã hoàn thành
-            const tabBtn = document.getElementById(`tab-${partNum}`);
-            tabBtn.classList.add('completed');
-            if (!tabBtn.textContent.includes("✓")) {
-                tabBtn.textContent += " ✓";
-            }
-
-            // Mở khóa phần tiếp theo (nếu có)
-            if (partNum < 3) {
-                unlockedParts[partNum + 1] = true;
-                const nextTab = document.getElementById(`tab-${partNum + 1}`);
-                nextTab.classList.remove('locked');
-            }
-
-            // Ẩn bảng câu hỏi vĩnh viễn, hiện mô hình thí nghiệm
-            setTimeout(() => {
-                document.getElementById(`quiz-${partNum}`).classList.add('hidden');
-                document.getElementById(`model-${partNum}`).classList.remove('hidden');
-                
-                // Tự động chuyển sang phần tiếp theo sau 1 giây
-                if (partNum < 3) {
-                    switchTab(partNum + 1);
-                }
-            }, 1000);
-        } else {
-            msgDiv.className = "status-msg error";
-            msgDiv.textContent = "❌ Có câu trả lời chưa chính xác. Hãy kiểm tra lại kiến thức và thử lại nhé!";
-        }
-    }
-</script>
-
-</body>
-</html>
+    <script>
+        // -------------------------------------------------------------
+        // 1. DỮ LIỆU CÂU HỎI (15 CÂU CHIA LÀM 3 PHẦN)
+        // -------------------------------------------------------------
+        const quizData = [
+            // --- PHẦN 1: PHÓNG XẠ NHÂN TẠO (5 Câu) ---
+            {
+                part: "Phần 1: Phóng xạ nhân tạo",
+                sim: "Phóng xạ nhân tạo (Bắn phá hạt nhân)",
+                question: "1. Hiện tượng phóng xạ nhân tạo khác với phóng xạ tự nhiên ở điểm cốt lõi nào?",
+                options: [
+                    "A. Do con người chủ động tác động bằng cách bắn phá hạt nhân bền",
+                    "B. Tạo ra các tia phóng xạ có năng lượng hoàn toàn khác",
+                    "C. Không phát ra tia alpha, beta hay gamma",
+                    "D. Chỉ xảy ra ở các nguyên tố siêu nặng"
+                ],
+                correct: 0,
+                exp: "Giải thích: Phóng xạ nhân tạo do con người chủ động dùng hạt cơ bản (neutron, alpha...) bắn phá hạt nhân bền[cite: 1, 2], trong khi phóng xạ tự nhiên diễn ra hoàn toàn tự phát."
+            },
+            {
+                part: "Phần 1: Phóng xạ nhân tạo",
+                sim: "Phóng xạ nhân tạo (Bắn phá hạt nhân)",
+                question: "2. Ai là những người đầu tiên phát hiện ra hiện tượng phóng xạ nhân tạo vào năm 1934?",
+                options: [
+                    "A. Marie Curie và Pierre Curie",
+                    "B. Irène Joliot-Curie và Frédéric Joliot",
+                    "C. Otto Hahn và Lise Meitner",
+                    "D. Ernest Rutherford và Niels Bohr"
+                ],
+                correct: 1,
+                exp: "Giải thích: Vợ chồng Irène Joliot-Curie và Frédéric Joliot phát hiện ra phóng xạ nhân tạo khi bắn hạt alpha vào lá Nhôm[cite: 1, 2]."
+            },
+            {
+                part: "Phần 1: Phóng xạ nhân tạo",
+                sim: "Phóng xạ nhân tạo (Bắn phá hạt nhân)",
+                question: "3. Tác nhân nào thường được sử dụng để kích thích hạt nhân bền trở thành đồng vị phóng xạ nhân tạo?",
+                options: [
+                    "A. Bức xạ hồng ngoại",
+                    "B. Bắn phá bằng neutron, proton, hạt alpha hoặc máy gia tốc",
+                    "C. Đun nóng ở nhiệt độ cao",
+                    "D. Tác động bằng dòng điện cao thế"
+                ],
+                correct: 1,
+                exp: "Giải thích
